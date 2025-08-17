@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ title }} | OLX{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="mb-2">
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-house-door me-1"></i>{% trans "Bosh sahifa" %}
+                        </a>
+                    </div>
+                    <h1 class="h3 mb-1">{{ title }}</h1>
+                    <p class="text-muted">{% trans "Barcha e'lonlaringizni boshqaring" %}</p>
+                </div>
+                <a href="{% url 'ads:create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i>{% trans "Yangi e'lon" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <ul class="nav nav-pills bg-light rounded p-2">
+                <li class="nav-item">
+                    <a class="nav-link {% if current_status == 'all' %}active{% endif %}" 
+                       href="?status=all">
+                        {% trans "Barcha" %} ({{ total_count }})
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if current_status == 'active' %}active{% endif %}" 
+                       href="?status=active">
+                        {% trans "Faol" %} ({{ active_count }})
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if current_status == 'inactive' %}active{% endif %}" 
+                       href="?status=inactive">
+                        {% trans "Nofaol" %} ({{ inactive_count }})
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if current_status == 'sold' %}active{% endif %}" 
+                       href="?status=sold">
+                        {% trans "Sotilgan" %} ({{ sold_count }})
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Ads List -->
+    {% if ads %}
+        <div class="row">
+            {% for ad in ads %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 {% if not ad.is_active %}border-secondary{% endif %}">
+                        <!-- Ad Image -->
+                        <div class="position-relative">
+                            {% if ad.main_image %}
+                                <img src="{{ ad.main_image.image.url }}" class="card-img-top" 
+                                     alt="{{ ad.title }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                     style="height: 200px;">
+                                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Status badges -->
+                            <div class="position-absolute top-0 end-0 m-2">
+                                {% if ad.is_vip %}
+                                    <span class="badge bg-warning text-dark mb-1 d-block">VIP</span>
+                                {% endif %}
+                                {% if ad.is_featured %}
+                                    <span class="badge bg-success mb-1 d-block">TOP</span>
+                                {% endif %}
+                                {% if not ad.is_active %}
+                                    <span class="badge bg-secondary d-block">{% trans "Nofaol" %}</span>
+                                {% elif ad.status == 'sold' %}
+                                    <span class="badge bg-success d-block">{% trans "Sotilgan" %}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <!-- Ad Title -->
+                            <h5 class="card-title mb-2">
+                                <a href="{% url 'ads:detail' slug=ad.slug %}" 
+                                   class="text-decoration-none {% if not ad.is_active %}text-muted{% endif %}">
+                                    {{ ad.title|truncatechars:50 }}
+                                </a>
+                            </h5>
+
+                            <!-- Price -->
+                            <p class="card-text h5 text-primary mb-2">
+                                {{ ad.price|floatformat:0 }} {% trans "so'm" %}
+                                {% if ad.is_negotiable %}
+                                    <small class="text-muted">({% trans "kelishish mumkin" %})</small>
+                                {% endif %}
+                            </p>
+
+                            <!-- Location and Category -->
+                            <p class="card-text text-muted small mb-2">
+                                <i class="bi bi-geo-alt me-1"></i>{{ ad.location.name }} • 
+                                <i class="{{ ad.category.icon }} me-1"></i>{{ ad.category.name }}
+                            </p>
+
+                            <!-- Stats -->
+                            <div class="card-text small text-muted mb-3">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <i class="bi bi-eye"></i> {{ ad.views_count }}
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="bi bi-heart"></i> {{ ad.favorites_count }}
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="bi bi-calendar"></i> {{ ad.created_at|date:"d.m" }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="mt-auto">
+                                <div class="btn-group w-100" role="group">
+                                    <a href="{% url 'ads:detail' slug=ad.slug %}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye me-1"></i>{% trans "Ko'rish" %}
+                                    </a>
+                                    <a href="{% url 'ads:edit' slug=ad.slug %}" 
+                                       class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-pencil me-1"></i>{% trans "Tahrir" %}
+                                    </a>
+                                </div>
+                                
+                                <div class="btn-group w-100 mt-2" role="group">
+                                    {% if ad.is_active %}
+                                        <button class="btn btn-outline-warning btn-sm" 
+                                                onclick="toggleAdStatus({{ ad.id }}, false)">
+                                            <i class="bi bi-pause-circle me-1"></i>{% trans "To'xtatish" %}
+                                        </button>
+                                    {% else %}
+                                        <button class="btn btn-outline-success btn-sm" 
+                                                onclick="toggleAdStatus({{ ad.id }}, true)">
+                                            <i class="bi bi-play-circle me-1"></i>{% trans "Faollashtirish" %}
+                                        </button>
+                                    {% endif %}
+                                    <!-- Option 1: Modern delete page (default) -->
+                                    <a href="{% url 'ads:delete' slug=ad.slug %}" 
+                                       class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash me-1"></i>{% trans "O'chirish" %}
+                                    </a>
+                                    
+                                    <!-- Option 2: Direct delete with alert (uncomment to use this instead) -->
+                                    <!-- 
+                                    <button class="btn btn-outline-danger btn-sm" 
+                                            onclick="deleteAdDirectly({{ ad.id }}, '{{ ad.title|escapejs }}')">
+                                        <i class="bi bi-trash me-1"></i>{% trans "O'chirish" %}
+                                    </button>
+                                    -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if ads.has_other_pages %}
+            <nav aria-label="{% trans 'Sahifalash' %}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if ads.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if current_status != 'all' %}status={{ current_status }}&{% endif %}page={{ ads.previous_page_number }}">
+                                {% trans "Oldingi" %}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in ads.paginator.page_range %}
+                        {% if ads.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > ads.number|add:'-3' and num < ads.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if current_status != 'all' %}status={{ current_status }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if ads.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if current_status != 'all' %}status={{ current_status }}&{% endif %}page={{ ads.next_page_number }}">
+                                {% trans "Keyingi" %}
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <!-- No Ads Message -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">
+                        {% if current_status == 'active' %}
+                            {% trans "Faol e'lonlar topilmadi" %}
+                        {% elif current_status == 'inactive' %}
+                            {% trans "Nofaol e'lonlar topilmadi" %}
+                        {% elif current_status == 'sold' %}
+                            {% trans "Sotilgan e'lonlar topilmadi" %}
+                        {% else %}
+                            {% trans "Hali e'lonlar yo'q" %}
+                        {% endif %}
+                    </h4>
+                    <p class="text-muted mb-4">
+                        {% if current_status == 'all' %}
+                            {% trans "Birinchi e'loningizni joylashtiring va sotishni boshlang!" %}
+                        {% else %}
+                            {% trans "Ushbu kategoriyada e'lonlar mavjud emas." %}
+                        {% endif %}
+                    </p>
+                    {% if current_status == 'all' %}
+                        <a href="{% url 'ads:create' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle me-2"></i>{% trans "Birinchi e'lonni yaratish" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleAdStatus(adId, activate) {
+    const url = activate ? '{% url "users:activate_ad" %}' : '{% url "users:deactivate_ad" %}';
+    const action = activate ? '{% trans "faollashtirish" %}' : '{% trans "to'xtatish" %}';
+    
+    if (confirm(`{% trans "Haqiqatan ham ushbu e'lonni" %} ${action} {% trans "xohlaysizmi?" %}`)) {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: 'ad_id=' + adId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success alert
+                showSuccessAlert(data.message);
+                // Reload page after a short delay to show the alert
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showErrorAlert(data.error || '{% trans "Xatolik yuz berdi" %}');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorAlert('{% trans "Xatolik yuz berdi" %}');
+        });
+    }
+}
+
+// Function to show success alert
+function showSuccessAlert(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        if (alertDiv && alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 3000);
+}
+
+// Function to show error alert
+function showErrorAlert(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Auto remove after 5 seconds for errors
+    setTimeout(() => {
+        if (alertDiv && alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Function for direct delete with confirmation and alert
+function deleteAdDirectly(adId, adTitle) {
+    if (confirm(`Haqiqatan ham "${adTitle}" mahsulotini o'chirmoqchimisiz?`)) {
+        fetch('{% url "ads:ajax_delete" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: 'ad_id=' + adId
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success alert
+                showSuccessAlert(data.message);
+                // Reload page after a short delay to show the alert
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showErrorAlert(data.error || '{% trans "Xatolik yuz berdi" %}');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showErrorAlert('{% trans "Xatolik yuz berdi" %}');
+        });
+    }
+}
+
+// Auto-refresh every 30 seconds if there are active ads
+{% if ads and current_status == 'active' %}
+    setTimeout(() => {
+        location.reload();
+    }, 30000);
+{% endif %}
+</script>
+{% endblock %}

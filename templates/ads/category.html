@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ category.name }} - OLX{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb and Home Button -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-house-door"></i> {% trans "Bosh sahifa" %}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Category Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center">
+                <div class="category-icon me-3" style="background: linear-gradient(135deg, #4ECDC4, #4ECDC4CC); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="{{ category.icon }} text-white" style="font-size: 24px;"></i>
+                </div>
+                <div>
+                    <h1>{{ category.name }}</h1>
+                    <p class="text-muted mb-0">{{ ads.paginator.count }} {% trans "ta e'lon topildi" %}</p>
+                    {% if selected_location %}
+                        <p class="text-info mb-0">
+                            <i class="bi bi-geo-alt"></i> {{ selected_location.name }} viloyatidagi e'lonlar
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <form method="get" class="card p-3">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="q" class="form-control" placeholder="{% trans 'Qidirish...' %}" value="{{ request.GET.q }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="location" class="form-select modern-select location-select" data-placeholder="Barcha viloyatlar" data-search="true">
+                            <option value="">{% trans "Barcha viloyatlar" %}</option>
+                            {% for location in locations %}
+                                <option value="{{ location.slug }}" {% if location.slug == request.GET.location %}selected{% endif %}>
+                                    {{ location.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="min_price" class="form-control" placeholder="{% trans 'Min narx' %}" value="{{ request.GET.min_price }}">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="max_price" class="form-control" placeholder="{% trans 'Max narx' %}" value="{{ request.GET.max_price }}">
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ads Grid -->
+    <div class="row">
+        {% for ad in ads %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        {% if ad.main_image %}
+                            <img src="{{ ad.main_image.image.url }}" class="card-img-top" alt="{{ ad.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Badges -->
+                        {% if ad.is_vip %}
+                            <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-2">VIP</span>
+                        {% endif %}
+                        {% if ad.is_featured %}
+                            <span class="badge bg-success position-absolute top-0 end-0 m-2">TOP</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'ads:detail' ad.slug %}" class="text-decoration-none text-dark">
+                                {{ ad.title|truncatechars:50 }}
+                            </a>
+                        </h5>
+                        <p class="card-text text-primary fw-bold h5">
+                            {{ ad.price|floatformat:0 }} {% trans "so'm" %}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                <i class="bi bi-geo-alt"></i> {{ ad.location.name }}
+                            </small>
+                            <small class="text-muted">{{ ad.created_at|date:"d.m.Y" }}</small>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-muted">
+                                <i class="bi bi-eye"></i> {{ ad.views_count }}
+                                <i class="bi bi-heart ms-2"></i> {{ ad.favorites_count }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-search" style="font-size: 4rem; color: #ddd;"></i>
+                    <h4 class="mt-3">{% trans "E'lonlar topilmadi" %}</h4>
+                    <p class="text-muted">{% trans "Bu kategoriyada hozircha e'lonlar yo'q." %}</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'ads:create' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> {% trans "Birinchi e'lon berish" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if ads.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if ads.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ ads.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item disabled">
+                    <span class="page-link">{{ ads.number }} / {{ ads.paginator.num_pages }}</span>
+                </li>
+                
+                {% if ads.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ ads.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.min_price %}&min_price={{ request.GET.min_price }}{% endif %}{% if request.GET.max_price %}&max_price={{ request.GET.max_price }}{% endif %}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Enhanced filtering for category page
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const locationSelect = document.querySelector('.location-select');
+        const searchForm = document.querySelector('form');
+        const filterInputs = searchForm.querySelectorAll('input, select');
+        
+        // Location dropdown effects
+        if (locationSelect) {
+            locationSelect.addEventListener('mouseenter', function() {
+                this.style.borderColor = '#23e5db';
+                this.style.transform = 'translateY(-1px)';
+                this.style.transition = 'all 0.2s ease';
+            });
+            
+            locationSelect.addEventListener('mouseleave', function() {
+                if (!this.matches(':focus')) {
+                    this.style.borderColor = '#e9ecef';
+                    this.style.transform = 'translateY(0)';
+                }
+            });
+            
+            // Success state when value selected
+            locationSelect.addEventListener('change', function() {
+                if (this.value) {
+                    this.style.borderColor = '#28a745';
+                    // Show selected location in header
+                    updateLocationDisplay();
+                }
+            });
+        }
+        
+        // Auto-submit on location change
+        function updateLocationDisplay() {
+            const selectedOption = locationSelect.options[locationSelect.selectedIndex];
+            if (selectedOption.value) {
+                // You can add visual feedback here
+                console.log('Selected location:', selectedOption.text);
+            }
+        }
+        
+        // Add input validation and formatting
+        const priceInputs = searchForm.querySelectorAll('input[type="number"]');
+        priceInputs.forEach(function(input) {
+            input.addEventListener('input', function() {
+                // Remove negative values
+                if (this.value < 0) {
+                    this.value = 0;
+                }
+                // Add visual feedback for valid price
+                if (this.value && this.value > 0) {
+                    this.style.borderColor = '#28a745';
+                } else {
+                    this.style.borderColor = '#e9ecef';
+                }
+            });
+        });
+        
+        // Clear filters functionality
+        const clearFiltersBtn = document.createElement('button');
+        clearFiltersBtn.type = 'button';
+        clearFiltersBtn.className = 'btn btn-outline-secondary btn-sm ms-2';
+        clearFiltersBtn.innerHTML = '<i class="bi bi-x-circle"></i> Tozalash';
+        clearFiltersBtn.style.display = 'none';
+        
+        // Add clear button to form
+        const searchButton = searchForm.querySelector('button[type="submit"]');
+        if (searchButton && searchButton.parentNode) {
+            searchButton.parentNode.appendChild(clearFiltersBtn);
+        }
+        
+        // Show/hide clear button based on filters
+        function toggleClearButton() {
+            const hasFilters = Array.from(filterInputs).some(input => 
+                input.value && input.value.trim() !== ''
+            );
+            clearFiltersBtn.style.display = hasFilters ? 'inline-block' : 'none';
+        }
+        
+        // Clear filters click handler
+        clearFiltersBtn.addEventListener('click', function() {
+            filterInputs.forEach(input => {
+                input.value = '';
+                input.style.borderColor = '#e9ecef';
+            });
+            // Submit form to clear filters
+            searchForm.submit();
+        });
+        
+        // Monitor filter changes
+        filterInputs.forEach(input => {
+            input.addEventListener('input', toggleClearButton);
+            input.addEventListener('change', toggleClearButton);
+        });
+        
+        // Initial check
+        toggleClearButton();
+        
+    } catch (error) {
+        // Ignore JavaScript errors silently
+        console.log('Filter JS error:', error);
+    }
+});
+</script>
+{% endblock %}

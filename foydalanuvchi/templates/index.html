@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OLX.uz - Bepul e'lonlar taxtasi</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <h1>OLX.uz</h1>
+                </div>
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Qidirish...">
+                        <select id="categorySelect" class="category-select">
+                            <option value="">Barcha kategoriyalar</option>
+                            <option value="transport">Transport</option>
+                            <option value="electronics">Elektronika</option>
+                            <option value="real-estate">Ko'chmas mulk</option>
+                            <option value="home">Uy va bog'</option>
+                            <option value="fashion">Moda va stil</option>
+                            <option value="work">Ish</option>
+                            <option value="animals">Hayvonlar</option>
+                            <option value="children">Bolalar dunyosi</option>
+                            <option value="business">Biznes va xizmatlar</option>
+                            <option value="hobby">Sevimli mashg'ulot, dam olish va sport</option>
+                        </select>
+                        <button class="search-btn" onclick="searchAds()">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <div class="location-select">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <select id="locationSelect">
+                            <option value="">Barcha viloyatlar</option>
+                            <option value="tashkent">Toshkent</option>
+                            <option value="samarkand">Samarqand</option>
+                            <option value="bukhara">Buxoro</option>
+                            <option value="namangan">Namangan</option>
+                            <option value="andijan">Andijon</option>
+                            <option value="fergana">Farg'ona</option>
+                            <option value="kashkadarya">Qashqadaryo</option>
+                            <option value="surkhandarya">Surxondaryo</option>
+                            <option value="jizzakh">Jizzax</option>
+                            <option value="sirdarya">Sirdaryo</option>
+                            <option value="navoi">Navoiy</option>
+                            <option value="khorezm">Xorazm</option>
+                            <option value="karakalpakstan">Qoraqalpog'iston</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="language-select">
+                        <button class="lang-btn active" data-lang="uz">
+                            <i class="fas fa-globe"></i>
+                            <span>O'Z</span>
+                        </button>
+                        <button class="lang-btn" data-lang="ru">
+                            <i class="fas fa-globe"></i>
+                            <span>РУС</span>
+                        </button>
+                    </div>
+                    <button class="notifications-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-count">3</span>
+                    </button>
+                    <button class="favorites-btn" onclick="showFavorites()" title="Saralanganlar">
+                        <i class="fas fa-heart"></i>
+                        <span class="favorites-count" id="favoritesCount">0</span>
+                    </button>
+                    <button class="back-btn" id="backBtn" onclick="goBackToAllAds()" title="Orqaga qaytish" style="display: none;">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Orqaga</span>
+                    </button>
+                    <div class="auth-section" id="authSection">
+                        <button class="login-btn" onclick="showLoginModal()">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Kirish
+                        </button>
+                        <button class="register-btn" onclick="showRegisterModal()">
+                            <i class="fas fa-user-plus"></i>
+                            Ro'yxatdan o'tish
+                        </button>
+                    </div>
+                    <div class="profile-section" id="profileSection" style="display: none;">
+                        <div class="profile-menu">
+                            <button class="profile-btn" onclick="showProfile()">
+                                <i class="fas fa-user"></i>
+                                <span id="userName">Profil</span>
+                            </button>
+                        </div>
+                        <button class="add-ad-btn" onclick="showAddAdModal()">
+                            <i class="fas fa-plus"></i>
+                            E'lon berish
+                        </button>
+                        <button class="logout-btn" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Chiqish
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modern Categories Section -->
+    <section class="categories-section">
+        <div class="container">
+            <h2 class="categories-title">Kategoriyalar</h2>
+            <div class="categories-grid">
+                <div class="category-card" data-category="all">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-th-large"></i>
+                    </div>
+                    <span class="category-name">Barchasi</span>
+                </div>
+                <div class="category-card" data-category="children">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                        <i class="fas fa-baby"></i>
+                    </div>
+                    <span class="category-name">Bolalar dunyosi</span>
+                </div>
+                <div class="category-card" data-category="real-estate">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <span class="category-name">Ko'chmas mulk</span>
+                </div>
+                <div class="category-card" data-category="transport">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <span class="category-name">Transport</span>
+                </div>
+                <div class="category-card" data-category="work">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <span class="category-name">Ish</span>
+                </div>
+                <div class="category-card" data-category="animals">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                    <span class="category-name">Hayvonlar</span>
+                </div>
+                <div class="category-card" data-category="home">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                        <i class="fas fa-couch"></i>
+                    </div>
+                    <span class="category-name">Uy va bog'</span>
+                </div>
+                <div class="category-card" data-category="electronics">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%);">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <span class="category-name">Elektronika</span>
+                </div>
+                <div class="category-card" data-category="business">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <span class="category-name">Biznes va xizmatlar</span>
+                </div>
+                <div class="category-card" data-category="fashion">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <span class="category-name">Moda va stil</span>
+                </div>
+                <div class="category-card" data-category="hobby">
+                    <div class="category-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="fas fa-futbol"></i>
+                    </div>
+                    <span class="category-name">Sevimli mashg'ulot, dam olish va sport</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+
+            <!-- Ads Grid -->
+            <div class="ads-grid" id="adsGrid">
+                <!-- Ads will be populated by JavaScript -->
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination">
+                <!-- Pagination will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Ad Modal -->
+    <div class="modal" id="addAdModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeAddAdModal()">&times;</span>
+            <h2>Yangi e'lon qo'shish</h2>
+            <form id="addAdForm">
+                <div class="form-group">
+                    <label for="adTitle">E'lon nomi:</label>
+                    <input type="text" id="adTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="adCategory">Kategoriya:</label>
+                    <select id="adCategory" required>
+                        <option value="">Kategoriya tanlang</option>
+                        <option value="transport">Transport</option>
+                        <option value="electronics">Elektronika</option>
+                        <option value="real-estate">Ko'chmas mulk</option>
+                        <option value="home">Uy va bog'</option>
+                        <option value="fashion">Moda va stil</option>
+                        <option value="work">Ish</option>
+                        <option value="animals">Hayvonlar</option>
+                        <option value="children">Bolalar dunyosi</option>
+                        <option value="business">Biznes va xizmatlar</option>
+                        <option value="hobby">Sevimli mashg'ulot, dam olish va sport</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="adPrice">Narx (so'm):</label>
+                    <input type="number" id="adPrice" required>
+                </div>
+                <div class="form-group">
+                    <label for="adDescription">Tavsif:</label>
+                    <textarea id="adDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="adLocation">Joylashuv:</label>
+                    <select id="adLocation" required>
+                        <option value="">Hududni tanlang</option>
+                        <option value="tashkent">Toshkent</option>
+                        <option value="samarkand">Samarqand</option>
+                        <option value="bukhara">Buxoro</option>
+                        <option value="namangan">Namangan</option>
+                        <option value="andijan">Andijon</option>
+                        <option value="fergana">Farg'ona</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="adImages">Rasmlar:</label>
+                    <input type="file" id="adImages" multiple accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="adPhone">Telefon raqam:</label>
+                    <input type="tel" id="adPhone" required>
+                </div>
+                <button type="submit" class="submit-btn">E'lonni joylashtirish</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ad Details Modal -->
+    <div class="modal" id="adDetailsModal">
+        <div class="modal-content ad-details">
+            <span class="close-btn" onclick="closeAdDetailsModal()">&times;</span>
+            <div id="adDetailsContent">
+                <!-- Ad details will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>OLX.uz</h3>
+                    <ul>
+                        <li><a href="#">Biz haqimizda</a></li>
+                        <li><a href="#">Yordam</a></li>
+                        <li><a href="#">Qoidalar</a></li>
+                        <li><a href="#">Maxfiylik siyosati</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Foydalanuvchilar uchun</h3>
+                    <ul>
+                        <li><a href="#">Qanday sotish</a></li>
+                        <li><a href="#">Qanday sotib olish</a></li>
+                        <li><a href="#">Xavfsizlik qoidalari</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Bizga qo'shiling</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 OLX.uz - Barcha huquqlar himoyalangan</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

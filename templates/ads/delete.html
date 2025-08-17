@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "E'lonni o'chirish" %} - {{ ad.title }} | OLX{% endblock %}
+
+{% block extra_css %}
+<style>
+.delete-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+.delete-content {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+.warning-icon {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+.btn-delete {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+    border: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+.btn-delete:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    background: linear-gradient(45deg, #ee5a52, #ff6b6b);
+}
+.btn-cancel {
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    color: #495057;
+    border: 2px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+.btn-cancel:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-color: #adb5bd;
+    color: #212529;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card delete-card border-0">
+                <div class="card-body p-0">
+                    <div class="delete-content rounded p-4">
+                        <!-- Warning Icon -->
+                        <div class="text-center mb-4">
+                            <div class="warning-icon d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10" style="width: 80px; height: 80px;">
+                                <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2.5rem;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Title -->
+                        <h3 class="text-center mb-4 fw-bold text-dark">
+                            {% trans "E'lonni o'chirish" %}
+                        </h3>
+
+                        <!-- Confirmation Message -->
+                        <p class="text-center text-muted mb-4">
+                            {% blocktrans with title=ad.title %}
+                            Haqiqatan ham <strong>"{{ title }}"</strong> e'lonini o'chirmoqchimisiz?
+                            {% endblocktrans %}
+                        </p>
+
+                        <!-- Ad Preview -->
+                        <div class="card mb-4 border-0 shadow-sm">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center">
+                                    <!-- Ad Image -->
+                                    <div class="flex-shrink-0 me-3">
+                                        {% if ad.main_image %}
+                                            <img src="{{ ad.main_image.image.url }}" alt="{{ ad.title }}" 
+                                                 class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                 style="width: 60px; height: 60px;">
+                                                <i class="bi bi-image text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Ad Info -->
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-semibold">{{ ad.title|truncatechars:30 }}</h6>
+                                        <p class="mb-1 text-primary fw-bold">{{ ad.price|floatformat:0 }} {% trans "so'm" %}</p>
+                                        <small class="text-muted">
+                                            <i class="bi bi-geo-alt me-1"></i>{{ ad.location.name }} • 
+                                            <i class="{{ ad.category.icon }} me-1"></i>{{ ad.category.name }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Warning Notice -->
+                        <div class="alert alert-warning border-0 rounded-3 mb-4" style="background: linear-gradient(45deg, #fff3cd, #ffeaa7);">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <small><strong>{% trans "Eslatma:" %}</strong> {% trans "O'chirilgan e'lonni qayta tiklash mumkin emas." %}</small>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <form method="post" class="d-grid gap-3">
+                            {% csrf_token %}
+                            
+                            <button type="submit" class="btn btn-delete text-white py-3 fw-semibold rounded-3">
+                                <i class="bi bi-trash me-2"></i>{% trans "Ha, o'chirish" %}
+                            </button>
+                            
+                            <a href="{% url 'users:my_ads' %}" class="btn btn-cancel py-3 fw-semibold rounded-3 text-decoration-none">
+                                <i class="bi bi-arrow-left me-2"></i>{% trans "Bekor qilish" %}
+                            </a>
+                        </form>
+
+                        <!-- Back Link -->
+                        <div class="text-center mt-3">
+                            <a href="{% url 'users:my_ads' %}" class="text-muted text-decoration-none small hover-effect">
+                                <i class="bi bi-arrow-left me-1"></i>{% trans "Mening e'lonlarim" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

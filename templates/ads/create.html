@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "E'lon berish" %} - OLX{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">{% trans "E'lon berish" %}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Basic Information -->
+                                <h5 class="mb-3">{% trans "Asosiy ma'lumotlar" %}</h5>
+                                
+                                <div class="mb-3">
+                                    {{ form.title.label_tag }}
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.category.label_tag }}
+                                        {{ form.category }}
+                                        {% if form.category.errors %}
+                                            <div class="text-danger">{{ form.category.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.location.label_tag }}
+                                        {{ form.location }}
+                                        {% if form.location.errors %}
+                                            <div class="text-danger">{{ form.location.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.description.label_tag }}
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="text-danger">{{ form.description.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Price and Condition -->
+                                <h5 class="mb-3">{% trans "Narx va holat" %}</h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.price.label_tag }}
+                                        <div class="input-group">
+                                            {{ form.price }}
+                                            <span class="input-group-text">{% trans "so'm" %}</span>
+                                        </div>
+                                        {% if form.price.errors %}
+                                            <div class="text-danger">{{ form.price.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.condition.label_tag }}
+                                        {{ form.condition }}
+                                        {% if form.condition.errors %}
+                                            <div class="text-danger">{{ form.condition.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_negotiable }}
+                                        {{ form.is_negotiable.label_tag }}
+                                    </div>
+                                </div>
+                                
+                                <!-- Contact Information -->
+                                <h5 class="mb-3">{% trans "Aloqa ma'lumotlari" %}</h5>
+                                
+                                <div class="mb-3">
+                                    {{ form.phone.label_tag }}
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="text-danger">{{ form.phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <!-- Image Upload Section -->
+                                <h5 class="mb-3">{% trans "Rasmlar" %}</h5>
+                                <p class="text-muted small">{% trans "Siz 10 tagacha rasm yuklashingiz mumkin. Birinchi rasm asosiy rasm bo'ladi." %}</p>
+                                
+                                {{ image_formset.management_form }}
+                                <div id="image-forms">
+                                    {% for form in image_formset %}
+                                        <div class="image-form mb-3 p-3 border rounded">
+                                            {% if forloop.first %}
+                                                <label class="form-label">{% trans "Asosiy rasm" %}</label>
+                                            {% else %}
+                                                <label class="form-label">{% trans "Qo'shimcha rasm" %} {{ forloop.counter0 }}</label>
+                                            {% endif %}
+                                            
+                                            <div class="mb-2">
+                                                {{ form.image }}
+                                                {% if form.image.errors %}
+                                                    <div class="text-danger small">{{ form.image.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            {% if not forloop.first %}
+                                                <div class="form-check">
+                                                    {{ form.is_main }}
+                                                    <label class="form-check-label">{% trans "Asosiy rasm qilib belgilash" %}</label>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {{ form.DELETE }}
+                                            {% for hidden in form.hidden_fields %}
+                                                {{ hidden }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="alert alert-info small">
+                                    <i class="bi bi-info-circle"></i>
+                                    {% trans "Ruhsat etilgan formatlar: JPG, PNG, GIF. Maksimal hajm: 5MB." %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'core:home' %}" class="btn btn-secondary me-md-2">
+                                <i class="bi bi-arrow-left"></i> {% trans "Orqaga" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> {% trans "E'lon berish" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Location Dropdown Enhancement
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const locationSelect = document.querySelector('.location-select');
+        
+        if (locationSelect) {
+            // Simple hover effects
+            locationSelect.addEventListener('mouseenter', function() {
+                this.style.borderColor = '#23e5db';
+                this.style.transform = 'translateY(-1px)';
+            });
+            
+            locationSelect.addEventListener('mouseleave', function() {
+                if (!this.matches(':focus')) {
+                    this.style.borderColor = '#e9ecef';
+                    this.style.transform = 'translateY(0)';
+                }
+            });
+            
+            // Success state when value selected
+            locationSelect.addEventListener('change', function() {
+                if (this.value) {
+                    this.style.borderColor = '#28a745';
+                }
+            });
+        }
+    } catch (error) {
+        // Ignore JavaScript errors silently
+    }
+    
+    // Preview images before upload
+    const imageInputs = document.querySelectorAll('input[type="file"][name*="image"]');
+    imageInputs.forEach(function(input) {
+        input.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Create preview image
+                    let preview = input.parentElement.querySelector('.image-preview');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.className = 'image-preview mt-2';
+                        preview.style.maxWidth = '200px';
+                        preview.style.maxHeight = '150px';
+                        preview.style.objectFit = 'cover';
+                        preview.style.borderRadius = '8px';
+                        preview.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                        preview.style.transition = 'all 0.3s ease';
+                        input.parentElement.appendChild(preview);
+                    }
+                    preview.src = e.target.result;
+                    
+                    // Add hover effect to preview
+                    preview.addEventListener('mouseenter', function() {
+                        this.style.transform = 'scale(1.05)';
+                        this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.25)';
+                    });
+                    
+                    preview.addEventListener('mouseleave', function() {
+                        this.style.transform = 'scale(1)';
+                        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+    
+    // Add enhanced tooltips for location select
+    if (locationSelect) {
+        const tooltip = document.createElement('div');
+        tooltip.className = 'location-tooltip';
+        tooltip.style.cssText = `
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #002f34;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            z-index: 1000;
+        `;
+        tooltip.textContent = 'Joylashuvni tanlang';
+        
+        locationSelect.parentElement.style.position = 'relative';
+        locationSelect.parentElement.appendChild(tooltip);
+        
+        locationSelect.addEventListener('mouseenter', function() {
+            if (!this.value) {
+                tooltip.style.opacity = '1';
+            }
+        });
+        
+        locationSelect.addEventListener('mouseleave', function() {
+            tooltip.style.opacity = '0';
+        });
+        
+        locationSelect.addEventListener('change', function() {
+            if (this.value) {
+                tooltip.style.opacity = '0';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

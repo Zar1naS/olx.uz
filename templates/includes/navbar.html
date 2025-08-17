@@ -1,0 +1,97 @@
+{% load i18n %}
+{% load static %}
+
+<!-- Header -->
+<header class="header">
+    <div class="container">
+        <div class="header-top">
+            <div class="logo">
+                <h1><a href="{% url 'core:home' %}" style="color: white; text-decoration: none;">{{ SITE_NAME|default:"OLX" }}</a></h1>
+            </div>
+            
+            <div class="search-container">
+                <form method="get" class="search-box" action="{% url 'core:home' %}">
+                    <input type="text" name="q" placeholder="Qidirish..." value="{{ current_query }}">
+                    <select name="category" class="category-select">
+                        <option value="">Barcha kategoriyalar</option>
+                        {% for category in categories %}
+                            <option value="{{ category.slug }}" {% if category.slug == current_category %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="search-btn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                <form method="get" action="{% url 'core:home' %}">
+                    <select name="location" class="location-select" onchange="this.form.submit()">
+                        <option value="">Barcha viloyatlar</option>
+                        {% for location in locations %}
+                            <option value="{{ location.slug }}" {% if location.slug == current_location %}selected{% endif %}>
+                                {{ location.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+            
+            <div class="header-actions">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'ads:create' %}" class="btn btn-success me-2">
+                        <i class="fas fa-plus"></i> E'lon berish
+                    </a>
+                    
+                    <!-- User Dropdown -->
+                    <div class="dropdown" id="userDropdownContainer">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" 
+                                id="userDropdownBtn" onclick="toggleUserDropdown()">
+                            <i class="fas fa-user me-1"></i>{{ user.get_full_name|default:user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" id="userDropdownMenu" style="display: none;">
+                            <li>
+                                <h6 class="dropdown-header">
+                                    <i class="fas fa-user-circle me-1"></i>{{ user.get_full_name|default:user.username }}
+                                </h6>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'users:my_ads' %}">
+                                    <i class="fas fa-list me-2"></i>{% trans "Mening e'lonlarim" %}
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'users:favorites' %}">
+                                    <i class="fas fa-heart me-2"></i>{% trans "Saralangan" %}
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'users:profile' user.username %}">
+                                    <i class="fas fa-user me-2"></i>{% trans "Profil" %}
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'users:profile_edit' %}">
+                                    <i class="fas fa-edit me-2"></i>{% trans "Profilni tahrirlash" %}
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="{% url 'users:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>{% trans "Chiqish" %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="btn btn-outline-light me-2">
+                        <i class="fas fa-sign-in-alt"></i> Kirish
+                    </a>
+                    <a href="{% url 'users:register' %}" class="btn btn-success">
+                        <i class="fas fa-user-plus"></i> Ro'yxatdan o'tish
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ profile_user.get_full_name|default:profile_user.username }} | OLX{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-house-door me-1"></i>{% trans "Bosh sahifa" %}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        {% trans "Profil" %}: {{ profile_user.get_full_name|default:profile_user.username }}
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- User Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <!-- Avatar -->
+                    {% if profile_user.avatar %}
+                        <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}" 
+                             class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-secondary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" 
+                             style="width: 120px; height: 120px;">
+                            <i class="bi bi-person text-white" style="font-size: 3rem;"></i>
+                        </div>
+                    {% endif %}
+
+                    <!-- User Info -->
+                    <h4 class="card-title">{{ profile_user.get_full_name|default:profile_user.username }}</h4>
+                    
+                    {% if profile_user.get_full_name %}
+                        <p class="text-muted">@{{ profile_user.username }}</p>
+                    {% endif %}
+
+                    <!-- Stats -->
+                    <div class="row text-center mb-3">
+                        <div class="col-6">
+                            <div class="fw-bold text-primary">{{ ads_count }}</div>
+                            <small class="text-muted">{% trans "E'lonlar" %}</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="fw-bold text-success">{{ profile_user.date_joined|date:"M Y" }}</div>
+                            <small class="text-muted">{% trans "A'zo bo'lgan" %}</small>
+                        </div>
+                    </div>
+
+                    <!-- User Bio -->
+                    {% if profile_user.userprofile.bio %}
+                        <div class="border-top pt-3 mt-3">
+                            <p class="text-muted small mb-0">{{ profile_user.userprofile.bio }}</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    {% if is_own_profile %}
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="{% url 'users:profile_edit' %}" class="btn btn-primary">
+                                <i class="bi bi-pencil me-2"></i>{% trans "Profilni tahrirlash" %}
+                            </a>
+                            <a href="{% url 'users:my_ads' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-list me-2"></i>{% trans "Mening e'lonlarim" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Contact Info (for own profile) -->
+            {% if is_own_profile and profile_user.userprofile %}
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="card-title">{% trans "Aloqa ma'lumotlari" %}</h6>
+                        
+                        {% if profile_user.email %}
+                            <div class="mb-2">
+                                <i class="bi bi-envelope me-2 text-muted"></i>
+                                <span>{{ profile_user.email }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        {% if profile_user.userprofile.phone %}
+                            <div class="mb-2">
+                                <i class="bi bi-telephone me-2 text-muted"></i>
+                                <span>{{ profile_user.userprofile.phone }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        {% if profile_user.userprofile.location %}
+                            <div class="mb-0">
+                                <i class="bi bi-geo-alt me-2 text-muted"></i>
+                                <span>{{ profile_user.userprofile.location }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- User's Ads -->
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="mb-0">
+                    {% if is_own_profile %}
+                        {% trans "Mening e'lonlarim" %}
+                    {% else %}
+                        {{ profile_user.username }} {% trans "ning e'lonlari" %}
+                    {% endif %}
+                    ({{ ads_count }})
+                </h5>
+                
+                {% if is_own_profile %}
+                    <a href="{% url 'ads:create' %}" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus me-1"></i>{% trans "Yangi e'lon" %}
+                    </a>
+                {% endif %}
+            </div>
+
+            {% if ads %}
+                <div class="row">
+                    {% for ad in ads %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <!-- Ad Image -->
+                                <div class="position-relative">
+                                    {% if ad.main_image %}
+                                        <img src="{{ ad.main_image.image.url }}" class="card-img-top" 
+                                             alt="{{ ad.title }}" style="height: 150px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                             style="height: 150px;">
+                                            <i class="bi bi-image text-muted" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <!-- Status badges -->
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        {% if ad.is_vip %}
+                                            <span class="badge bg-warning text-dark mb-1 d-block">VIP</span>
+                                        {% endif %}
+                                        {% if ad.is_featured %}
+                                            <span class="badge bg-success d-block">TOP</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <a href="{% url 'ads:detail' slug=ad.slug %}" class="text-decoration-none">
+                                            {{ ad.title|truncatechars:30 }}
+                                        </a>
+                                    </h6>
+                                    
+                                    <p class="card-text h6 text-primary mb-2">
+                                        {{ ad.price|floatformat:0 }} {% trans "so'm" %}
+                                    </p>
+                                    
+                                    <p class="card-text text-muted small mb-2">
+                                        <i class="bi bi-geo-alt me-1"></i>{{ ad.location.name }}
+                                    </p>
+                                    
+                                    <div class="card-text small text-muted">
+                                        <div class="row text-center">
+                                            <div class="col-4">
+                                                <i class="bi bi-eye"></i> {{ ad.views_count }}
+                                            </div>
+                                            <div class="col-4">
+                                                <i class="bi bi-heart"></i> {{ ad.favorites_count }}
+                                            </div>
+                                            <div class="col-4">
+                                                <i class="bi bi-calendar"></i> {{ ad.created_at|date:"d.m" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if ads.has_other_pages %}
+                    <nav aria-label="{% trans 'Sahifalash' %}" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if ads.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ ads.previous_page_number }}">
+                                        {% trans "Oldingi" %}
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for num in ads.paginator.page_range %}
+                                {% if ads.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > ads.number|add:'-3' and num < ads.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if ads.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ ads.next_page_number }}">
+                                        {% trans "Keyingi" %}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            {% else %}
+                <!-- No Ads Message -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">
+                        {% if is_own_profile %}
+                            {% trans "Hali e'lonlar yo'q" %}
+                        {% else %}
+                            {% trans "Bu foydalanuvchida e'lonlar yo'q" %}
+                        {% endif %}
+                    </h4>
+                    {% if is_own_profile %}
+                        <p class="text-muted mb-4">
+                            {% trans "Birinchi e'loningizni joylashtiring va sotishni boshlang!" %}
+                        </p>
+                        <a href="{% url 'ads:create' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle me-2"></i>{% trans "Birinchi e'lonni yaratish" %}
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

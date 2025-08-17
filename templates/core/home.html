@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ SITE_NAME }} - {{ SITE_DESCRIPTION }}{% endblock %}
+
+{% block content %}
+
+    <!-- Categories Section -->
+    <section class="categories-section">
+        <div class="container">
+            <h2 class="categories-title">Kategoriyalar</h2>
+            <div class="categories-grid">
+                {% for category in categories %}
+                <a href="{% url 'ads:category' category.slug %}" class="category-card text-decoration-none">
+                    <div class="category-icon category-icon-{{ forloop.counter }}">
+                        <i class="{{ category.icon }}"></i>
+                    </div>
+                    <span class="category-name">{{ category.name }}</span>
+                    <small>({{ category.ads_count }})</small>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Ads Grid -->
+    <main class="main-content">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h3>E'lonlar ({{ total_ads }})</h3>
+                </div>
+            </div>
+            
+            <div class="ads-grid">
+                {% for ad in ads %}
+                <div class="ad-card">
+                    {% if ad.main_image %}
+                        <img src="{{ ad.main_image.image.url }}" alt="{{ ad.title }}" class="ad-image">
+                    {% else %}
+                        <div class="ad-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #666;">
+                            <i class="fas fa-image fa-3x"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="ad-content">
+                        <h4 class="ad-title">
+                            <a href="{% url 'ads:detail' ad.slug %}">{{ ad.title }}</a>
+                        </h4>
+                        <div class="ad-price">{{ ad.price|floatformat:0 }} so'm</div>
+                        <div class="ad-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ ad.location.name }}
+                        </div>
+                        <div class="ad-date">{{ ad.created_at|date:"d.m.Y" }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>E'lonlar topilmadi</h3>
+                        <p>Qidiruv parametrlarini o'zgartirib ko'ring</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if ads.has_other_pages %}
+            <nav class="pagination">
+                {% if ads.has_previous %}
+                    <a href="?page={{ ads.previous_page_number }}" class="btn btn-outline-primary">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% endif %}
+                
+                <span class="current">
+                    {{ ads.number }} / {{ ads.paginator.num_pages }}
+                </span>
+                
+                {% if ads.has_next %}
+                    <a href="?page={{ ads.next_page_number }}" class="btn btn-outline-primary">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </nav>
+            {% endif %}
+        </div>
+    </main>
+
+
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Bootstrap JS is already loaded in base.html -->
+{% endblock %}

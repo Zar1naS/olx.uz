@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Profilni tahrirlash" %} | OLX{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-house-door me-1"></i>{% trans "Bosh sahifa" %}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'users:profile' user.username %}" class="text-decoration-none">
+                            {% trans "Profil" %}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        {% trans "Tahrirlash" %}
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        <i class="bi bi-person-gear me-2"></i>{% trans "Profilni tahrirlash" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- User Information Section -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="bi bi-person me-2 text-primary"></i>{% trans "Asosiy ma'lumotlar" %}
+                                </h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- First Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
+                                    {{ user_form.first_name.label }}
+                                </label>
+                                {{ user_form.first_name }}
+                                {% if user_form.first_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ user_form.first_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Last Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.last_name.id_for_label }}" class="form-label">
+                                    {{ user_form.last_name.label }}
+                                </label>
+                                {{ user_form.last_name }}
+                                {% if user_form.last_name.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ user_form.last_name.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Username -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.username.id_for_label }}" class="form-label">
+                                    {{ user_form.username.label }}
+                                </label>
+                                {{ user_form.username }}
+                                {% if user_form.username.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ user_form.username.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ user_form.email.id_for_label }}" class="form-label">
+                                    {{ user_form.email.label }}
+                                </label>
+                                {{ user_form.email }}
+                                {% if user_form.email.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ user_form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Avatar -->
+                        {% if user_form.avatar %}
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <label for="{{ user_form.avatar.id_for_label }}" class="form-label">
+                                        {{ user_form.avatar.label }}
+                                    </label>
+                                    
+                                    <!-- Current Avatar -->
+                                    {% if user.avatar %}
+                                        <div class="mb-3">
+                                            <img src="{{ user.avatar.url }}" alt="{% trans 'Joriy avatar' %}" 
+                                                 class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+                                            <div class="small text-muted mt-1">{% trans "Joriy avatar" %}</div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {{ user_form.avatar }}
+                                    {% if user_form.avatar.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ user_form.avatar.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Profile Information Section -->
+                        {% if profile_form %}
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="border-bottom pb-2 mb-3">
+                                        <i class="bi bi-card-text me-2 text-primary"></i>{% trans "Qo'shimcha ma'lumotlar" %}
+                                    </h5>
+                                </div>
+                            </div>
+
+                            <!-- Bio -->
+                            {% if profile_form.bio %}
+                                <div class="mb-3">
+                                    <label for="{{ profile_form.bio.id_for_label }}" class="form-label">
+                                        {{ profile_form.bio.label }}
+                                    </label>
+                                    {{ profile_form.bio }}
+                                    {% if profile_form.bio.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {{ profile_form.bio.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        {% trans "O'zingiz haqingizda qisqacha ma'lumot bering" %}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="row">
+                                <!-- Phone -->
+                                {% if profile_form.phone %}
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ profile_form.phone.id_for_label }}" class="form-label">
+                                            {{ profile_form.phone.label }}
+                                        </label>
+                                        {{ profile_form.phone }}
+                                        {% if profile_form.phone.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ profile_form.phone.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Location -->
+                                {% if profile_form.location %}
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ profile_form.location.id_for_label }}" class="form-label">
+                                            {{ profile_form.location.label }}
+                                        </label>
+                                        {{ profile_form.location }}
+                                        {% if profile_form.location.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ profile_form.location.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Birth Date -->
+                            {% if profile_form.birth_date %}
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ profile_form.birth_date.id_for_label }}" class="form-label">
+                                            {{ profile_form.birth_date.label }}
+                                        </label>
+                                        {{ profile_form.birth_date }}
+                                        {% if profile_form.birth_date.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {{ profile_form.birth_date.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        <!-- Submit Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check2 me-2"></i>{% trans "Saqlash" %}
+                                    </button>
+                                    <a href="{% url 'users:profile' user.username %}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-2"></i>{% trans "Bekor qilish" %}
+                                    </a>
+                                    <a href="{% url 'users:password_change' %}" class="btn btn-outline-warning ms-auto">
+                                        <i class="bi bi-key me-2"></i>{% trans "Parolni o'zgartirish" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Preview avatar image before upload
+document.addEventListener('DOMContentLoaded', function() {
+    const avatarInput = document.querySelector('input[type="file"][name*="avatar"]');
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // Find existing preview or create new one
+                    let preview = document.querySelector('.avatar-preview');
+                    if (!preview) {
+                        preview = document.createElement('div');
+                        preview.className = 'avatar-preview mb-2';
+                        avatarInput.parentNode.insertBefore(preview, avatarInput);
+                    }
+                    
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" alt="{% trans 'Avatar oldindan ko\'rish' %}" 
+                             class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;">
+                        <div class="small text-muted mt-1">{% trans "Yangi avatar (oldindan ko'rish)" %}</div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

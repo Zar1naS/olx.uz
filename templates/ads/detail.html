@@ -1,0 +1,469 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+{% load humanize %}
+
+{% block title %}{{ ad.title }} - OLX{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb and Home Button -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-house-door"></i> {% trans "Bosh sahifa" %}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'ads:category' ad.category.slug %}" class="text-decoration-none">
+                            <i class="{{ ad.category.icon }}"></i> {{ ad.category.name }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ ad.title|truncatechars:30 }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Ad Images Column -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    {% if ad.images.exists %}
+                        <!-- Image Carousel -->
+                        <div id="adImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for image in ad.images.all %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <img src="{{ image.image.url }}" class="d-block w-100" alt="{{ ad.title }}" 
+                                             style="height: 400px; object-fit: cover; border-radius: 8px;">
+                                        {% if image.is_main %}
+                                            <span class="badge bg-primary position-absolute top-0 start-0 m-2">
+                                                {% trans "Asosiy rasm" %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            
+                            {% if ad.images.count > 1 %}
+                                <button class="carousel-control-prev" type="button" data-bs-target="#adImageCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">{% trans "Oldingi" %}</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#adImageCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">{% trans "Keyingi" %}</span>
+                                </button>
+                                
+                                <!-- Thumbnail indicators -->
+                                <div class="carousel-indicators position-relative mt-3">
+                                    {% for image in ad.images.all %}
+                                        <button type="button" data-bs-target="#adImageCarousel" data-bs-slide-to="{{ forloop.counter0 }}" 
+                                                {% if forloop.first %}class="active"{% endif %} aria-current="true" aria-label="Slide {{ forloop.counter }}">
+                                            <img src="{{ image.image.url }}" alt="Thumbnail" class="img-thumbnail" style="width: 60px; height: 40px; object-fit: cover;">
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <!-- No Image Placeholder -->
+                        <div class="d-flex align-items-center justify-content-center bg-light" style="height: 400px; border-radius: 8px;">
+                            <div class="text-center text-muted">
+                                <i class="bi bi-image" style="font-size: 4rem;"></i>
+                                <p class="mt-2">{% trans "Rasm mavjud emas" %}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Ad Description -->
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{% trans "Tavsif" %}</h5>
+                    <div class="ad-description">
+                        {{ ad.description|linebreaks }}
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Ad Stats -->
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <i class="bi bi-eye text-primary"></i>
+                            <div class="fw-bold">{{ ad.views_count }}</div>
+                            <small class="text-muted">{% trans "Ko'rishlar" %}</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="bi bi-heart text-danger"></i>
+                            <div class="fw-bold">{{ ad.favorites_count }}</div>
+                            <small class="text-muted">{% trans "Sevimlilar" %}</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="bi bi-calendar text-success"></i>
+                            <div class="fw-bold">{{ ad.created_at|date:"d.m.Y" }}</div>
+                            <small class="text-muted">{% trans "Yaratilgan" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ad Info and Actions Column -->
+        <div class="col-md-4">
+            <!-- Price and Title -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h1 class="h4 mb-0">{{ ad.title }}</h1>
+                        {% if user.is_authenticated and not is_owner %}
+                            <button class="btn btn-outline-danger btn-sm" onclick="toggleFavorite({{ ad.id }})"
+                                    id="favoriteBtn-{{ ad.id }}">
+                                <i class="bi bi-heart{% if is_favorite %}-fill{% endif %}"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="price-section mb-3">
+                        <h2 class="text-primary fw-bold mb-1">{{ ad.price|floatformat:0 }} {% trans "so'm" %}</h2>
+                        {% if ad.is_negotiable %}
+                            <small class="text-muted">{% trans "Narx kelishish mumkin" %}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- VIP and Featured badges -->
+                    <div class="badges mb-3">
+                        {% if ad.is_vip %}
+                            <span class="badge bg-warning text-dark me-1">VIP</span>
+                        {% endif %}
+                        {% if ad.is_featured %}
+                            <span class="badge bg-success">{% trans "TOP" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Ad Details -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{% trans "Ma'lumotlar" %}</h5>
+                    
+                    <div class="ad-details">
+                        <div class="detail-item d-flex justify-content-between mb-2">
+                            <span class="text-muted">{% trans "Kategoriya" %}:</span>
+                            <span>
+                                <a href="{% url 'ads:category' ad.category.slug %}" class="text-decoration-none">
+                                    <i class="{{ ad.category.icon }} me-1"></i>{{ ad.category.name }}
+                                </a>
+                            </span>
+                        </div>
+                        
+                        <div class="detail-item d-flex justify-content-between mb-2">
+                            <span class="text-muted">{% trans "Joylashuv" %}:</span>
+                            <span>
+                                <a href="{% url 'ads:location' ad.location.slug %}" class="text-decoration-none">
+                                    <i class="bi bi-geo-alt me-1"></i>{{ ad.location.name }}
+                                </a>
+                            </span>
+                        </div>
+                        
+                        <div class="detail-item d-flex justify-content-between mb-2">
+                            <span class="text-muted">{% trans "Holati" %}:</span>
+                            <span>{{ ad.get_condition_display }}</span>
+                        </div>
+                        
+                        <div class="detail-item d-flex justify-content-between mb-2">
+                            <span class="text-muted">{% trans "E'lon ID" %}:</span>
+                            <span>#{{ ad.id }}</span>
+                        </div>
+                        
+                        <div class="detail-item d-flex justify-content-between">
+                            <span class="text-muted">{% trans "Yangilangan" %}:</span>
+                            <span>{{ ad.updated_at|naturaltime }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{% trans "Aloqa" %}</h5>
+                    
+                    <!-- Seller Info -->
+                    <div class="seller-info mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            {% if ad.user.avatar %}
+                                <img src="{{ ad.user.avatar.url }}" alt="{{ ad.user.username }}" 
+                                     class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                                <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person text-white"></i>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <a href="{% url 'users:profile' ad.user.username %}" class="fw-bold text-decoration-none">
+                                    {{ ad.user.get_full_name|default:ad.user.username }}
+                                </a>
+                                <div class="small text-muted">
+                                    {% trans "E'lonlar" %}: {{ ad.user.ads_count }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Actions -->
+                    {% if user.is_authenticated and not is_owner %}
+                        <div class="contact-actions d-grid gap-2">
+                            <a href="tel:{{ ad.phone }}" class="btn btn-success">
+                                <i class="bi bi-telephone me-2"></i>{{ ad.phone }}
+                            </a>
+                            <button class="btn btn-outline-primary" onclick="showContactOptions()">
+                                <i class="bi bi-chat-dots me-2"></i>{% trans "Xabar yuborish" %}
+                            </button>
+                        </div>
+                    {% elif not user.is_authenticated %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            {% trans "Sotuvchi bilan aloqa qilish uchun" %} 
+                            <a href="{% url 'users:login' %}">{% trans "tizimga kiring" %}</a>.
+                        </div>
+                    {% endif %}
+                    
+                    {% if is_owner %}
+                        <div class="owner-actions d-grid gap-2">
+                            <a href="{% url 'ads:edit' ad.slug %}" class="btn btn-primary">
+                                <i class="bi bi-pencil me-2"></i>{% trans "Tahrirlash" %}
+                            </a>
+                            <a href="{% url 'ads:delete' ad.slug %}" class="btn btn-outline-danger">
+                                <i class="bi bi-trash me-2"></i>{% trans "O'chirish" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Report Ad (for non-owners) -->
+            {% if user.is_authenticated and not is_owner %}
+                <div class="text-center">
+                    <button class="btn btn-link btn-sm text-muted" onclick="showReportModal()">
+                        <i class="bi bi-flag me-1"></i>{% trans "Shikoyat bildirish" %}
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Related Ads -->
+    {% if related_ads %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <h4 class="mb-4">{% trans "O'xshash e'lonlar" %}</h4>
+                <div class="row">
+                    {% for related_ad in related_ads %}
+                        <div class="col-md-4 col-lg-2 mb-3">
+                            <div class="card h-100">
+                                <a href="{% url 'ads:detail' related_ad.slug %}" class="text-decoration-none">
+                                    {% if related_ad.main_image %}
+                                        <img src="{{ related_ad.main_image.image.url }}" class="card-img-top" 
+                                             alt="{{ related_ad.title }}" style="height: 120px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                             style="height: 120px;">
+                                            <i class="bi bi-image text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body p-2">
+                                        <h6 class="card-title small mb-1">{{ related_ad.title|truncatechars:30 }}</h6>
+                                        <p class="card-text text-primary fw-bold small mb-0">
+                                            {{ related_ad.price|floatformat:0 }} {% trans "so'm" %}
+                                        </p>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% trans "E'lonni shikoyat qilish" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="ad_id" value="{{ ad.id }}">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">{% trans "Shikoyat sababi" %}</label>
+                        <select class="form-select" name="reason" required>
+                            <option value="">{% trans "Sabab tanlang" %}</option>
+                            <option value="spam">{% trans "Spam" %}</option>
+                            <option value="inappropriate">{% trans "Nomaqbul kontent" %}</option>
+                            <option value="fraud">{% trans "Firibgarlik" %}</option>
+                            <option value="duplicate">{% trans "Takroriy e'lon" %}</option>
+                            <option value="wrong_category">{% trans "Noto'g'ri kategoriya" %}</option>
+                            <option value="other">{% trans "Boshqa" %}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">{% trans "Qo'shimcha ma'lumot" %}</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Bekor qilish" %}</button>
+                <button type="button" class="btn btn-danger" onclick="submitReport()">{% trans "Shikoyat yuborish" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+function toggleFavorite(adId) {
+    console.log('toggleFavorite called with adId:', adId);
+    
+    if (!adId) {
+        console.error('Ad ID is required');
+        alert('Ad ID is missing');
+        return;
+    }
+    
+    // Find the favorite button
+    const btn = document.getElementById('favoriteBtn-' + adId);
+    if (!btn) {
+        console.error('Favorite button not found for ad:', adId);
+        alert('Favorite button not found');
+        return;
+    }
+    
+    const icon = btn.querySelector('i');
+    if (!icon) {
+        console.error('Icon not found in favorite button');
+        alert('Icon not found');
+        return;
+    }
+    
+    // Disable button to prevent double clicks
+    btn.disabled = true;
+    
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        console.error('CSRF token not found');
+        alert('CSRF token not found. Please refresh the page.');
+        btn.disabled = false;
+        return;
+    }
+    
+    console.log('CSRF token found:', csrfToken.value);
+    console.log('Making request to toggle favorite for ad:', adId);
+    
+    fetch('{% url "users:toggle_favorite" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken.value
+        },
+        body: 'ad_id=' + adId
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        
+        if (data.error) {
+            console.error('Server error:', data.error);
+            alert('Error: ' + data.error);
+            return;
+        }
+        
+        if (data.is_favorite !== undefined) {
+            console.log('Updating favorite status to:', data.is_favorite);
+            
+            if (data.is_favorite) {
+                icon.classList.remove('bi-heart');
+                icon.classList.add('bi-heart-fill');
+                btn.title = 'Saralanganlardan olib tashlash';
+                console.log('Added to favorites - icon updated');
+            } else {
+                icon.classList.remove('bi-heart-fill');
+                icon.classList.add('bi-heart');
+                btn.title = 'Saralanganlarga qo\'shish';
+                console.log('Removed from favorites - icon updated');
+            }
+            
+            // Update favorites count if available
+            if (data.favorites_count !== undefined) {
+                const favCountElement = document.querySelector('.favorites-count');
+                if (favCountElement) {
+                    favCountElement.textContent = data.favorites_count;
+                }
+            }
+            
+            if (data.message) {
+                console.log('Success message:', data.message);
+                // Optional: Show a brief success message
+                // You can implement a toast notification here
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error in toggleFavorite:', error);
+        alert('Xatolik yuz berdi: ' + error.message);
+    })
+    .finally(() => {
+        // Re-enable the button
+        btn.disabled = false;
+    });
+}
+
+function showContactOptions() {
+    alert('{% trans "Xabar yuborish funksiyasi tez orada qo'shiladi." %}');
+}
+
+function showReportModal() {
+    new bootstrap.Modal(document.getElementById('reportModal')).show();
+}
+
+function submitReport() {
+    const form = document.getElementById('reportForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "ads:report" %}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message || data.error);
+        bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endblock %}

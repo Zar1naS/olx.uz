@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ title }} | OLX{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="mb-2">
+                        <a href="{% url 'core:home' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-house-door me-1"></i>{% trans "Bosh sahifa" %}
+                        </a>
+                    </div>
+                    <h1 class="h3 mb-1">
+                        <i class="bi bi-heart-fill text-danger me-2"></i>{{ title }}
+                    </h1>
+                    <p class="text-muted">{% trans "Siz saqlab qo'ygan e'lonlar" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorites List -->
+    {% if favorites %}
+        <div class="row">
+            {% for ad in favorites %}
+                <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+                    <div class="card h-100">
+                        <!-- Ad Image -->
+                        <div class="position-relative">
+                            {% if ad.main_image %}
+                                <img src="{{ ad.main_image.image.url }}" class="card-img-top" 
+                                     alt="{{ ad.title }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                     style="height: 200px;">
+                                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Status badges -->
+                            <div class="position-absolute top-0 end-0 m-2">
+                                {% if ad.is_vip %}
+                                    <span class="badge bg-warning text-dark mb-1 d-block">VIP</span>
+                                {% endif %}
+                                {% if ad.is_featured %}
+                                    <span class="badge bg-success d-block">TOP</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Favorite button -->
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <button class="btn btn-sm btn-outline-light bg-white border-0 text-danger" 
+                                        onclick="toggleFavorite({{ ad.id }})" title="{% trans 'Sevimlidan olib tashlash' %}">
+                                    <i class="bi bi-heart-fill"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <!-- Ad Title -->
+                            <h5 class="card-title mb-2">
+                                <a href="{% url 'ads:detail' slug=ad.slug %}" class="text-decoration-none">
+                                    {{ ad.title|truncatechars:50 }}
+                                </a>
+                            </h5>
+
+                            <!-- Price -->
+                            <p class="card-text h5 text-primary mb-2">
+                                {{ ad.price|floatformat:0 }} {% trans "so'm" %}
+                                {% if ad.is_negotiable %}
+                                    <small class="text-muted">({% trans "kelishish mumkin" %})</small>
+                                {% endif %}
+                            </p>
+
+                            <!-- Location and Category -->
+                            <p class="card-text text-muted small mb-2">
+                                <i class="bi bi-geo-alt me-1"></i>{{ ad.location.name }} • 
+                                <i class="{{ ad.category.icon }} me-1"></i>{{ ad.category.name }}
+                            </p>
+
+                            <!-- Seller Info -->
+                            <p class="card-text text-muted small mb-3">
+                                <i class="bi bi-person me-1"></i>
+                                <a href="{% url 'users:profile' ad.user.username %}" class="text-decoration-none text-muted">
+                                    {{ ad.user.get_full_name|default:ad.user.username }}
+                                </a>
+                            </p>
+
+                            <!-- Stats -->
+                            <div class="card-text small text-muted mb-3">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <i class="bi bi-eye"></i> {{ ad.views_count }}
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="bi bi-heart"></i> {{ ad.favorites_count }}
+                                    </div>
+                                    <div class="col-4">
+                                        <i class="bi bi-calendar"></i> {{ ad.created_at|date:"d.m" }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="mt-auto">
+                                <div class="d-grid">
+                                    <a href="{% url 'ads:detail' slug=ad.slug %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-eye me-2"></i>{% trans "Ko'rish" %}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if favorites.has_other_pages %}
+            <nav aria-label="{% trans 'Sahifalash' %}" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if favorites.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ favorites.previous_page_number }}">
+                                {% trans "Oldingi" %}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in favorites.paginator.page_range %}
+                        {% if favorites.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > favorites.number|add:'-3' and num < favorites.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if favorites.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ favorites.next_page_number }}">
+                                {% trans "Keyingi" %}
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <!-- No Favorites Message -->
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-heart" style="font-size: 4rem; color: #dee2e6;"></i>
+                    </div>
+                    <h4 class="text-muted mb-3">
+                        {% trans "Hali sevimli e'lonlar yo'q" %}
+                    </h4>
+                    <p class="text-muted mb-4">
+                        {% trans "Yoqgan e'lonlarni sevimlilar ro'yxatiga qo'shing va keyinroq oson topishni ta'minlang" %}
+                    </p>
+                    <a href="{% url 'core:home' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search me-2"></i>{% trans "E'lonlarni ko'rish" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleFavorite(adId) {
+    fetch('{% url "users:toggle_favorite" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: 'ad_id=' + adId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.is_favorite !== undefined) {
+            // If removed from favorites, remove the card from the page
+            if (!data.is_favorite) {
+                // Find the card containing this ad and remove it with animation
+                const cards = document.querySelectorAll('.card');
+                cards.forEach(card => {
+                    const link = card.querySelector('a[href*="' + adId + '"]');
+                    if (link) {
+                        card.style.transition = 'all 0.3s ease-out';
+                        card.style.transform = 'scale(0.8)';
+                        card.style.opacity = '0';
+                        setTimeout(() => {
+                            card.remove();
+                            // Check if no more cards exist
+                            const remainingCards = document.querySelectorAll('.card').length;
+                            if (remainingCards === 0) {
+                                location.reload(); // Reload to show empty state
+                            }
+                        }, 300);
+                    }
+                });
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('{% trans "Xatolik yuz berdi" %}');
+    });
+}
+
+// Add CSRF token to all forms
+document.addEventListener('DOMContentLoaded', function() {
+    // Create hidden CSRF token input for AJAX requests
+    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = 'csrfmiddlewaretoken';
+        csrfToken.value = '{{ csrf_token }}';
+        document.body.appendChild(csrfToken);
+    }
+});
+</script>
+{% endblock %}

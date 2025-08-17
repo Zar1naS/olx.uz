@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "E'lonni tahrirlash" %} - {{ ad.title }} - OLX{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">{% trans "E'lonni tahrirlash" %}</h3>
+                    <a href="{% url 'ads:detail' ad.slug %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-eye"></i> {% trans "E'lonni ko'rish" %}
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Basic Information -->
+                                <h5 class="mb-3">{% trans "Asosiy ma'lumotlar" %}</h5>
+                                
+                                <div class="mb-3">
+                                    {{ form.title.label_tag }}
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.category.label_tag }}
+                                        {{ form.category }}
+                                        {% if form.category.errors %}
+                                            <div class="text-danger">{{ form.category.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.location.label_tag }}
+                                        {{ form.location }}
+                                        {% if form.location.errors %}
+                                            <div class="text-danger">{{ form.location.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.description.label_tag }}
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="text-danger">{{ form.description.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Price and Condition -->
+                                <h5 class="mb-3">{% trans "Narx va holat" %}</h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.price.label_tag }}
+                                        <div class="input-group">
+                                            {{ form.price }}
+                                            <span class="input-group-text">{% trans "so'm" %}</span>
+                                        </div>
+                                        {% if form.price.errors %}
+                                            <div class="text-danger">{{ form.price.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.condition.label_tag }}
+                                        {{ form.condition }}
+                                        {% if form.condition.errors %}
+                                            <div class="text-danger">{{ form.condition.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_negotiable }}
+                                        {{ form.is_negotiable.label_tag }}
+                                    </div>
+                                </div>
+                                
+                                <!-- Contact Information -->
+                                <h5 class="mb-3">{% trans "Aloqa ma'lumotlari" %}</h5>
+                                
+                                <div class="mb-3">
+                                    {{ form.phone.label_tag }}
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="text-danger">{{ form.phone.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <!-- Current Images -->
+                                <h5 class="mb-3">{% trans "Joriy rasmlar" %}</h5>
+                                {% if ad.images.exists %}
+                                    <div class="current-images mb-4">
+                                        {% for image in ad.images.all %}
+                                            <div class="current-image-item mb-2 p-2 border rounded">
+                                                <img src="{{ image.image.url }}" alt="Current image" 
+                                                     class="img-fluid rounded" style="max-height: 100px;">
+                                                {% if image.is_main %}
+                                                    <span class="badge bg-primary">{% trans "Asosiy" %}</span>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle"></i>
+                                        {% trans "Hozircha rasmlar yo'q" %}
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Image Upload Section -->
+                                <h5 class="mb-3">{% trans "Yangi rasmlar qo'shish" %}</h5>
+                                <p class="text-muted small">{% trans "Siz 10 tagacha rasm yuklashingiz mumkin." %}</p>
+                                
+                                {{ image_formset.management_form }}
+                                <div id="image-forms">
+                                    {% for form in image_formset %}
+                                        <div class="image-form mb-3 p-3 border rounded">
+                                            <label class="form-label">
+                                                {% if forloop.first %}
+                                                    {% trans "Rasm" %} 1
+                                                {% else %}
+                                                    {% trans "Rasm" %} {{ forloop.counter }}
+                                                {% endif %}
+                                            </label>
+                                            
+                                            <div class="mb-2">
+                                                {{ form.image }}
+                                                {% if form.image.errors %}
+                                                    <div class="text-danger small">{{ form.image.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="form-check">
+                                                {{ form.is_main }}
+                                                <label class="form-check-label">{% trans "Asosiy rasm qilib belgilash" %}</label>
+                                            </div>
+                                            
+                                            {{ form.DELETE }}
+                                            {% for hidden in form.hidden_fields %}
+                                                {{ hidden }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="alert alert-info small">
+                                    <i class="fas fa-info-circle"></i>
+                                    {% trans "Ruhsat etilgan formatlar: JPG, PNG, GIF. Maksimal hajm: 5MB." %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'ads:detail' ad.slug %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left"></i> {% trans "Orqaga" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {% trans "O'zgarishlarni saqlash" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview images before upload (same as create template)
+    const imageInputs = document.querySelectorAll('input[type="file"][name*="image"]');
+    imageInputs.forEach(function(input) {
+        input.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let preview = input.parentElement.querySelector('.image-preview');
+                    if (!preview) {
+                        preview = document.createElement('img');
+                        preview.className = 'image-preview mt-2';
+                        preview.style.maxWidth = '200px';
+                        preview.style.maxHeight = '150px';
+                        preview.style.objectFit = 'cover';
+                        preview.style.borderRadius = '8px';
+                        preview.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                        input.parentElement.appendChild(preview);
+                    }
+                    preview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
