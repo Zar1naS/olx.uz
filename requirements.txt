@@ -1,0 +1,20 @@
+# Django
+Django==5.2.3
+
+# Third-party packages
+Pillow==10.0.0  # For image processing
+django-crispy-forms==2.0  # For better forms
+crispy-bootstrap5==0.7  # Bootstrap 5 support for crispy forms
+django-extensions==3.2.3  # Development utilities
+python-decouple==3.8  # Environment variables
+django-debug-toolbar==4.2.0  # Development debugging
+
+# Production packages (optional)
+gunicorn==21.2.0  # WSGI server
+whitenoise==6.5.0  # Static files serving
+
+# Database
+psycopg2-binary==2.9.7  # PostgreSQL for Railway
+
+# Additional production packages
+dj-database-url==2.1.0  # Database URL parsing

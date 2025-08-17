@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Dropdown Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Modern Select Dropdown Styling */
+        .modern-select {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+            min-height: 44px;
+        }
+
+        .modern-select:hover {
+            border-color: #23e5db;
+            box-shadow: 0 4px 12px rgba(35, 229, 219, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .modern-select:focus {
+            border-color: #23e5db;
+            box-shadow: 0 0 0 3px rgba(35, 229, 219, 0.1);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        /* Location Select Specific Styling */
+        .location-select {
+            background-image: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2323e5db" width="18" height="18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>'),
+                linear-gradient(45deg, transparent 50%, #6c757d 50%),
+                linear-gradient(135deg, #6c757d 50%, transparent 50%);
+            background-position: 
+                left 12px center,
+                right 18px top 50%,
+                right 12px top 50%;
+            background-size: 18px 18px, 6px 6px, 6px 6px;
+            background-repeat: no-repeat;
+            padding-left: 42px;
+        }
+
+        .location-select:hover {
+            /* Location icon stays the same, only dropdown arrow changes */
+            background-image: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2323e5db" width="18" height="18"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>'),
+                linear-gradient(45deg, transparent 50%, #23e5db 50%),
+                linear-gradient(135deg, #23e5db 50%, transparent 50%);
+            background-position: 
+                left 12px center,
+                right 18px top 50%,
+                right 12px top 50%;
+            background-size: 18px 18px, 6px 6px, 6px 6px;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+        
+        .demo-section {
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-5">Location Dropdown Test</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="demo-section">
+                    <h3>Standard Bootstrap Select</h3>
+                    <select class="form-select">
+                        <option value="">Joylashuvni tanlang</option>
+                        <option value="tashkent">Toshkent</option>
+                        <option value="samarkand">Samarqand</option>
+                        <option value="bukhara">Buxoro</option>
+                        <option value="namangan">Namangan</option>
+                        <option value="andijon">Andijon</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="demo-section">
+                    <h3>Modern Location Dropdown</h3>
+                    <select class="modern-select location-select" id="location-test">
+                        <option value="">Joylashuvni tanlang</option>
+                        <option value="tashkent">Toshkent</option>
+                        <option value="samarkand">Samarqand</option>
+                        <option value="bukhara">Buxoro</option>
+                        <option value="namangan">Namangan</option>
+                        <option value="andijon">Andijon</option>
+                        <option value="fergana">Farg'ona</option>
+                        <option value="kashkadarya">Qashqadaryo</option>
+                        <option value="surkhandarya">Surxondaryo</option>
+                        <option value="jizzakh">Jizzax</option>
+                        <option value="sirdarya">Sirdaryo</option>
+                        <option value="navoi">Navoiy</option>
+                        <option value="khorezm">Xorazm</option>
+                        <option value="karakalpakstan">Qoraqalpog'iston</option>
+                    </select>
+                    <div id="selected-value" class="mt-3 text-muted">
+                        <strong>Selected:</strong> <span id="selected-text">None</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="demo-section">
+                    <h3>Interactive Demo</h3>
+                    <p>Sichqonchani location dropdown ustiga olib boring va tanlovni o'zgartirib ko'ring!</p>
+                    
+                    <form class="row g-3">
+                        <div class="col-md-6">
+                            <label for="demo-location" class="form-label">
+                                <i class="text-primary">📍</i> Joylashuv
+                            </label>
+                            <select class="modern-select location-select" id="demo-location">
+                                <option value="">Barcha viloyatlar</option>
+                                <option value="tashkent">Toshkent</option>
+                                <option value="samarkand">Samarqand</option>
+                                <option value="bukhara">Buxoro</option>
+                                <option value="namangan">Namangan</option>
+                                <option value="andijon">Andijon</option>
+                                <option value="fergana">Farg'ona</option>
+                                <option value="kashkadarya">Qashqadaryo</option>
+                                <option value="surkhandarya">Surxondaryo</option>
+                                <option value="jizzakh">Jizzax</option>
+                                <option value="sirdarya">Sirdaryo</option>
+                                <option value="navoi">Navoiy</option>
+                                <option value="khorezm">Xorazm</option>
+                                <option value="karakalpakstan">Qoraqalpog'iston</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="demo-category" class="form-label">Kategoriya</label>
+                            <select class="modern-select" id="demo-category">
+                                <option value="">Kategoriyani tanlang</option>
+                                <option value="electronics">Elektronika</option>
+                                <option value="fashion">Kiyim-kechak</option>
+                                <option value="home">Uy-ro'zg'or</option>
+                                <option value="auto">Avtomobillar</option>
+                                <option value="realestate">Ko'chmas mulk</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Location dropdown test initialized');
+            
+            const locationSelect = document.getElementById('location-test');
+            const selectedText = document.getElementById('selected-text');
+            
+            // All modern selects
+            const allSelects = document.querySelectorAll('.modern-select');
+            
+            allSelects.forEach(select => {
+                // Hover effects
+                select.addEventListener('mouseenter', function() {
+                    console.log('Select hovered:', this.id || this.className);
+                });
+                
+                select.addEventListener('mouseleave', function() {
+                    console.log('Select left:', this.id || this.className);
+                });
+                
+                // Change event
+                select.addEventListener('change', function() {
+                    console.log('Select changed:', this.value, this.options[this.selectedIndex].text);
+                    
+                    if (this === locationSelect) {
+                        selectedText.textContent = this.value ? this.options[this.selectedIndex].text : 'None';
+                    }
+                    
+                    // Visual feedback
+                    if (this.value) {
+                        this.style.borderColor = '#28a745';
+                        this.style.background = 'linear-gradient(135deg, #fff 0%, #f0f8f0 100%)';
+                    } else {
+                        this.style.borderColor = '#e9ecef';
+                        this.style.background = '#fff';
+                    }
+                });
+                
+                // Focus event
+                select.addEventListener('focus', function() {
+                    console.log('Select focused:', this.id || this.className);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
